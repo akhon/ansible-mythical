@@ -1,0 +1,7 @@
+---
+
+- include: http.yml
+  when: mythical_http
+  
+- include: sftp.yml
+  when: mythical_sftp

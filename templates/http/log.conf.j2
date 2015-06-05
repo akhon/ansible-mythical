@@ -1,0 +1,112 @@
+{
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'NOTSET',
+            'formatter': 'console',
+            'stream': None,  # stderr
+            'filters': ['version', 'trace'],
+        },
+        'syslog-error': {
+            'class': 'logging.handlers.SysLogHandler',  # defaults to UDP
+            'level': 'NOTSET',
+            'formatter': 'syslog-error',
+            'address': ('127.0.0.1', {{ mythical_syslog_port }}),
+            'filters': ['version', 'trace'],
+        },
+        'syslog-request': {
+            'class': 'logging.handlers.SysLogHandler',  # defaults to UDP
+            'level': 'INFO',
+            'formatter': 'syslog-request',
+            'address': ('127.0.0.1', {{ mythical_syslog_port }}),
+            'filters': ['version', 'trace'],
+        },
+        'syslog-access': {
+            'class': 'logging.handlers.SysLogHandler',  # defaults to UDP
+            'level': 'INFO',
+            'formatter': 'syslog-access',
+            'address': ('127.0.0.1', {{ mythical_syslog_port }}),
+            'filters': ['version', 'trace'],
+        },
+{% if mythical_sentry %}
+        'sentry': {
+            'level': 'ERROR',
+            'class': 'raven.handlers.logging.SentryHandler',
+            'dsn': 'https://{{ mythical_sentry.username }}:{{ mythical_sentry.password }}@app.getsentry.com/{{ mythical_sentry.project }}',
+        },
+{% endif %}
+    },
+    'formatters': {
+         'console': {
+            'format': (
+                '%(asctime)s,%(msecs)03d : '
+                '%(levelname)-5.5s : '
+                '%(name)s : '
+                '%(message)s'
+            ),
+            'datefmt': '%H:%M:%S',
+        },
+        'syslog-error': {
+            'format': (
+                'mythical-http-error[%(process)d]: '
+                '%(asctime)s : '
+                '%(levelname)s : '
+                '%(name)s : '
+                '%(process)d : '
+                '%(threadName)s : '
+                'version=%(version)s : '
+                'guru_id=%(trace_id)s : '
+                '%(message)s'
+            ),
+        },
+        'syslog-request': {
+            '()': logger_class.NoExcTextLogFormatter,
+            'format': 'mythical-http-request[%(process)d]: %(message)s',
+        },
+        'syslog-access': {
+            '()': logger_class.NoExcTextLogFormatter,
+            'format': 'mythical-http-access[%(process)d]: %(message)s',
+        },
+    },
+    'filters': {
+        'trace': {
+            '()': logger_class.TraceIdLogFilter,
+            'default': '',
+        },
+        'version': {
+            '()': logger_class.VersionLogFilter,
+            'default': '',
+        },
+    },
+    'loggers': {
+        'sqlalchemy': {
+            'level': 'WARN',
+            'qualname': 'sqlalchemy.engine',
+            'propagate': True,
+        },
+        'gunicorn.access': {
+            'level': 'INFO',
+            'qualname': 'gunicorn.access',
+            'propagate': False,
+            'handlers': ['console', 'syslog-access'],
+        },
+        'mythical-request': {
+            'level': 'INFO',
+            'qualname': 'mythical-request',
+            'propagate': False,
+            'handlers': ['console', 'syslog-request'],
+        },
+    },
+    'root': {
+        'level': '{{ mythical_log_level }}',
+        'handlers': [
+            'console',
+            'syslog-error',
+{% if mythical_sentry %}
+            'sentry',
+{% endif %}
+        ],
+    },
+}

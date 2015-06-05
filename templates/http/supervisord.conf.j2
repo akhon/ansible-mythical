@@ -1,0 +1,6 @@
+[program:mythical-http]
+command=mythicald -c /etc/mythical/mythical.conf -- -c /etc/mythical/http/gunicorn.conf -p /var/run/mythical/http.pid
+autostart=true
+autorestart=true
+user=mythical
+group=mythical

@@ -1,0 +1,18 @@
+/var/log/mythical/*.log
+{% if mythical_http %}
+/var/log/mythical/http/*.log
+{% endif %}
+{% if mythical_sftp %}
+/var/log/mythical/sftp/*.log
+{% endif %}
+{
+    rotate 3
+    daily
+    missingok
+    notifempty
+    delaycompress
+    compress
+    postrotate
+        reload rsyslog >/dev/null 2>&1 || true
+    endscript
+}

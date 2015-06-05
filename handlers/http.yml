@@ -1,0 +1,7 @@
+---
+
+- name: start mythical-http
+  supervisorctl: name=mythical-http state=started
+
+- name: restart mythical-http
+  supervisorctl: name=mythical-http state=restarted

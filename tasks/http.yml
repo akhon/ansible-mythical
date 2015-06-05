@@ -1,0 +1,47 @@
+---
+
+- name: create http dirs
+  file: path={{ item }} owner=mythical group=mythical state=directory mode=0755
+  with_items:
+  - /etc/mythical/http
+  - /var/lib/mythical/http
+  - /var/log/mythical/http
+
+- name: http gunicorn
+  template: src=http/gunicorn.conf.j2 dest=/etc/mythical/http/gunicorn.conf owner=mythical group=mythical mode=0644
+  notify:
+  - restart mythical-http
+
+- name: http log
+  template: src=http/log.conf.j2 dest=/etc/mythical/http/log.conf owner=root group=root mode=0644
+  notify:
+  - restart mythical-http
+  
+- name: http supervisor conf
+  template: >
+    src=http/supervisord.conf.j2
+    dest="{{ supervisord_additional_conf_dir }}/mythical-http.conf"
+    owner=root
+    group=root
+    mode=0644
+  notify:
+  - update supervisord
+  - restart mythical-sftp
+  
+- name: http syslog
+  copy: src=http/rsyslog.conf dest=/etc/rsyslog.d/40-mythical-http.conf owner=root group=root mode=0644
+  notify:
+  - restart rsyslog
+
+- name: enable http
+  shell: date > /var/lib/mythical/http/health
+  args:
+    creates: /var/lib/mythical/http/health
+  when: mythical_http_enabled
+
+- name: disable http
+  file: /var/lib/mythical/http/health state=absent
+  when: not mythical_http_enabled
+
+- name: http supervisor present
+  supervisorctl: name=mythical-http state=present

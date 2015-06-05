@@ -1,0 +1,30 @@
+---
+
+- name: user
+  user: name=mythical state=present shell=/bin/bash createhome=no home=/var/lib/mythical
+
+- name: dirs
+  file: path={{ item }} owner=mythical group=mythical state=directory mode=0755
+  with_items:
+    - /etc/mythical
+    - /var/lib/mythical
+    - /var/run/mythical
+    - /var/log/mythical
+    
+- name: conf
+  template: src=mythical.conf.j2 dest=/etc/mythical/mythical.conf owner=mythical group=mythical mode=0644
+
+- name: log
+  template: src=log.conf.j2 dest=/etc/mythical/log.conf owner=mythical group=mythical mode=0644
+
+- name: newrelic
+  template: src=newrelic.ini.j2 dest=/etc/mythical/newrelic.ini owner=mythical group=mythical mode=0600
+  when: newrelic_license_key is defined and newrelic_license_key
+
+- name: syslog
+  copy: src=rsyslog.conf dest=/etc/rsyslog.d/41-mythical.conf owner=root group=root mode=0644
+  notify:
+    - restart rsyslog
+
+- name: log rotation
+  template: src=logrotate.j2 dest=/etc/logrotate.d/mythical owner=root group=root mode=0644

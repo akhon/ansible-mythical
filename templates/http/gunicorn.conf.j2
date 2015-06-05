@@ -1,0 +1,103 @@
+import logging
+import os
+import multiprocessing
+
+import gunicorn.glogging
+
+
+bind = '{{ mythical_http_host }}:{{ mythical_http_port }}'
+
+backlog = {{ mythical_http_backlog }}
+
+connections = {{ mythical_http_connections }}
+
+log_level = 'INFO'
+
+logconfig = '/etc/mythical/http/log.conf'
+
+error_logfile = '-'
+
+access_logfile = '-'
+
+workers = multiprocessing.cpu_count() * 2 + 1
+
+worker_class = 'gevent'
+
+proc_name = 'mythical'
+
+access_log_format = '{{ mythical_http_access_format.strip() }}'
+
+
+class logger_class(gunicorn.glogging.Logger):
+
+    class NoExcTextLogFormatter(logging.Formatter):
+
+        def format(self, record):
+            record.message = record.getMessage()
+            if self.usesTime():
+                record.asctime = self.formatTime(record, self.datefmt)
+            s = self._fmt % record.__dict__
+            return s
+
+    class VersionLogFilter(logging.Filter):
+
+        version = None
+        
+        def __init__(self, default='-'):
+            super(logger_class.VersionLogFilter, self).__init__()
+            self.default = default
+
+        def filter(self, record):
+            record.version = self.version or self.default
+            return True
+
+    class TraceIdLogFilter(logging.Filter):
+      
+        get_trace_id = None
+
+        def __init__(self, default='-'):
+            super(logger_class.TraceIdLogFilter, self).__init__()
+            self.default = default
+
+        def filter(self, record):
+            if self.get_trace_id:
+                record.trace_id = self.get_trace_id() or self.default
+            else:
+                record.trace_id = self.default
+            return True
+
+    @classmethod
+    def fixup(cls, mythicals):
+        cls.VersionLogFilter.version = mythicals.__version__
+        cls.TraceIdLogFilter.get_trace_id = staticmethod(lambda: mythicals.tracer.id)
+
+    def setup(self, cfg):
+        if not cfg.logconfig:
+            super(logger_class, self).setup(cfg)
+        else:
+            if os.path.exists(cfg.logconfig):
+                logconfig = eval(
+                    open(cfg.logconfig, 'r').read(), {'logger_class': self}
+                )
+                logging.config.dictConfig(logconfig)
+            else:
+                raise RuntimeError("Error: log config '%s' not found" % cfg.logconfig)
+
+
+def post_worker_init(worker):
+    """
+    Fixup logging, initialize everything, and apply middleware.
+    """
+    
+    def _conf_file():
+        conf_file = os.getenv('MYTHICALS_CONF', None)
+        if conf_file is None or conf_file == '-':
+            conf_file = '/etc/mythical/mythical.conf'
+            if not os.path.isfile(conf_file):
+                conf_file = None
+        return conf_file
+
+    import mythicals
+
+    logger_class.fixup(mythicals)
+    mythicals.init(_conf_file())

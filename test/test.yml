@@ -1,0 +1,27 @@
+- hosts: all
+  vars:
+    pypi_index_url: "https://{{ lookup('env', 'PYPI_USERNAME') }}:{{ lookup('env', 'PYPI_PASSWORD') }}@{{ lookup('env', 'PYPI_HOST') }}{{ lookup('env', 'PYPI_INDEX') }}"
+  tasks:
+    - name: create pip dir
+      file: "path=~{{ item }}/.pip owner={{ item }} group={{ item }} mode=0700 state=directory"
+      with_items:
+        - root
+    
+    - name: create pip confs
+      template: "src=pip.conf.j2 dest=~{{ item }}/.pip/pip.conf owner={{ item }} group={{ item }} mode=600"
+      with_items:
+        - root
+    
+    - name: create distutils confs
+      template: "src=pydistutils.cfg.j2 dest=~{{ item }}/.pydistutils.cfg owner={{ item }} group={{ item }} mode=600"
+      with_items:
+        - root
+
+- hosts: all
+  vars:
+    mythical_client_pip_name: mythical[tests]
+  roles:
+    - postgresql-client
+    - rsyslog
+    - monit
+    - ansible-mythical

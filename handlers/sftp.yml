@@ -1,0 +1,7 @@
+---
+
+- name: start mythical-sftp
+  supervisorctl: name=mythical-sftp state=started
+
+- name: restart mythical-sftp
+  supervisorctl: name=mythical-sftp state=restarted

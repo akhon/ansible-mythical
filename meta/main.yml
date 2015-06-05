@@ -1,0 +1,8 @@
+---
+
+dependencies:
+- rsyslog
+- monit
+- rsyslog
+- postgresql-client
+- supervisord

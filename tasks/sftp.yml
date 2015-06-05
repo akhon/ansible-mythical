@@ -1,0 +1,40 @@
+---
+
+- name: create sftp dirs
+  file: path={{ item }} owner=mythical group=mythical state=directory mode=0755
+  with_items:
+  - /etc/mythical/sftp
+  - /var/lib/mythical/sftp
+  - /var/log/mythical/sftp
+
+- name: sftp log
+  template: src=sftp/log.conf.j2 dest=/etc/mythical/sftp/log.conf owner=root group=root mode=0644
+  notify:
+  - restart mythical-sftp
+  
+- name: sftp syslog
+  copy: src=sftp/rsyslog.conf dest=/etc/rsyslog.d/40-mythical-sftp.conf owner=root group=root mode=0644
+  notify:
+  - restart rsyslog
+
+- name: sftp host rsa
+  template: >
+    src=sftp/host_rsa.j2
+    dest=/etc/mythical/sftp/host_rsa
+    owner=mythical
+    group=mythical
+    mode=0600
+
+- name: sftp supervisor conf
+  template: >
+    src=sftp/supervisord.conf.j2
+    dest="{{ supervisord_additional_conf_dir }}/mythical-sftp.conf"
+    owner=root
+    group=root
+    mode=0644
+  notify:
+  - update supervisord
+  - restart mythical-sftp
+
+- name: sftp supervisor present
+  supervisorctl: name=mythical-sftp state=present

@@ -1,0 +1,43 @@
+import netaddr
+
+
+config.DB.update({
+    'url': '{{ mythical_db_url }}',
+    'echo': {{ 'True' if mythical_db_echo else 'False' }},
+})
+
+config.DOWNLOADS.update({
+    'use': '{{ mythical_downloads_use }}',
+})
+
+config.DOWNLOADS['os'].update({
+    'root': '{{ mythical_downloads_os_root }}',
+})
+
+config.DOWNLOADS['s3'].update({
+    'bucket': '{{ mythical_downloads_s3_bucket }}',
+    'prefix': '{{ mythical_downloads_s3_prefix }}',
+    'aws_access_key': '{{ mythical_downloads_s3_aws_access_key }}',
+    'aws_secret_key': '{{ mythical_downloads_s3_aws_secret_key }}',
+})
+
+config.NEWRELIC = {
+    'config_file': '/etc/mythical/newrelic.ini',
+    'environment': '{{ mythical_newrelic_env }}',
+}
+
+config.API_NEWRELIC = {{ 'True' if mythical_newrelic and newrelic_license_key is defined else 'False' }}
+
+config.API_PROXIED = {{ 'True' if mythical_http_proxied else 'False' }}
+
+config.API_RECORD = {{ 'True' if mythical_http_record else 'False' }}
+
+config.API_ALLOWED_CIDRS.extend([
+{% for cidr in mythical_http_allowed_cidrs %}
+    netaddr.IPNetwork('{{ cidr }}'),
+{% endfor %}
+])
+
+config.API_HEALTH.update({
+    'file_path': '/var/lib/mythical/http/health',
+})

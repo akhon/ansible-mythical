@@ -1,0 +1,8 @@
+---
+
+- name: checkout source
+  git: repo="{{ mythical_git_repo }}" dest="~/mythical" version="{{ mythical_git_version }}"
+  sudo: no
+
+- name: install from source
+  pip: name="~{{ ansible_ssh_user }}/mythical[daemon]" extra_args=-e

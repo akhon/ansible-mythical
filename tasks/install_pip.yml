@@ -1,0 +1,9 @@
+---
+
+- name: install via pip
+  pip: name="{{ mythical_pip_name }}" version="{{ mythical_pip_version }}" state=present
+  when: mythical_pip_version
+
+- name: install latest via pip
+  pip: name="{{ mythical_pip_name }}" state=present
+  when: not mythical_pip_version

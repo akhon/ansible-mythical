@@ -1,0 +1,6 @@
+[program:mythical-sftp]
+command=mythicals sftp --host={{ mythical_sftp_host }} --port={{ mythical_sftp_port }} --log-conf=/etc/mythical/sftp/log.conf --host-key=/etc/mythical/sftp/host_rsa --forking
+autostart=true
+autorestart=true
+user=mythical
+group=mythical

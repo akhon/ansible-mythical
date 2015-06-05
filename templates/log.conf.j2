@@ -1,0 +1,65 @@
+{
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'NOTSET',
+            'formatter': 'console',
+            'stream': None,  # stderr
+            'filters': ['version', 'trace'],
+        },
+        'syslog-error': {
+            'class': 'logging.handlers.SysLogHandler',  # defaults to UDP
+            'level': 'NOTSET',
+            'formatter': 'syslog-error',
+            'address': ('127.0.0.1', {{ mythical_syslog_port }}),
+            'filters': ['version', 'trace'],
+        },
+    },
+    'formatters': {
+         'console': {
+            'format': (
+                '%(asctime)s,%(msecs)03d : '
+                '%(levelname)-5.5s : '
+                '%(name)s : '
+                '%(message)s'
+            ),
+            'datefmt': '%H:%M:%S',
+        },
+        'syslog-error': {
+            'format': (
+                'mythical-message[%(process)d]: '
+                '%(asctime)s : '
+                '%(levelname)s : '
+                '%(name)s : '
+                '%(process)d : '
+                '%(threadName)s : '
+                'version=%(version)s : '
+                'guru_id=%(trace_id)s : '
+                '%(message)s'
+            ),
+        },
+    },
+    'filters': {
+        'trace': {
+            '()': mythicals.TraceIdLogFilter,
+            'default': '',
+        },
+        'version': {
+            '()': mythicals.VersionLogFilter,
+            'default': '',
+        },
+    },
+    'loggers': {
+        'sqlalchemy': {
+            'level': 'WARN',
+            'qualname': 'sqlalchemy.engine',
+            'propagate': True,
+        },
+    },
+    'root': {
+        'level': '{{ mythical_log_level }}',
+        'handlers': ['console', 'syslog-error'],
+    },
+}

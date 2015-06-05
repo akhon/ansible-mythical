@@ -1,0 +1,9 @@
+---
+
+- name: install from apt
+  pip: name="{{ mythical_apt_package }}={{ mythical_apt_version }}" state=present
+  when: mythical_apt_version
+
+- name: install latest from apt
+  pip: name="{{ mythical_apt_package }}" state=latest
+  when: not mythical_apt_version

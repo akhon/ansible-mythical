@@ -1,0 +1,31 @@
+---
+
+- include: install_apt.yml
+  tags: [mythical, mythical-install]
+  when: mythical_install_method == "apt"
+
+- include: install_git.yml
+  tags: [mythical, mythical-install]
+  when: mythical_install_method == "git"
+
+- include: install_sync.yml
+  tags: [mythical, mythical-install]
+  when: mythical_install_method == "sync"
+
+- include: install_pip.yml
+  tags: [mythical, mythical-install]
+  when: mythical_install_method == "pip"
+
+- include: client.yml
+  tags: [mythical, mythical-client]
+
+- include: base.yml
+  tags: [mythical]
+
+- include: http.yml
+  tags: [mythical, mythical-http]
+  when: mythical_http
+  
+- include: sftp.yml
+  tags: [mythical, mythical-sftp]
+  when: mythical_sftp
