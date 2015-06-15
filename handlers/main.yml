@@ -5,3 +5,6 @@
   
 - include: sftp.yml
   when: mythical_sftp
+
+- name: restart rsyslog
+  service: name=rsyslog state=restarted

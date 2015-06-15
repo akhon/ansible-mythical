@@ -1,5 +1,11 @@
 ---
 
+- name: install postgres client
+  apt: name={{ item }} state=present
+  with_items:
+    - postgresql-client
+    - libpq-dev
+
 - include: install_apt.yml
   tags: [mythical, mythical-install]
   when: mythical_install_method == "apt"
