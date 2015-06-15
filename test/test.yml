@@ -23,5 +23,4 @@
   roles:
     - postgresql-client
     - rsyslog
-    - monit
     - ansible-mythical
