@@ -1,9 +1,9 @@
 ---
 
-#- name: install client via pip
-#  pip: name="{{ mythical_client_pip_name }}" state=present version="{{ mythical_client_pip_version }}"
-#  when: mythical_client_pip_version != ''
-#
-#- name: install latest client via pip
-#  pip: name="{{ mythical_client_pip_name }}" state=present
-#  when: not mythical_client_pip_version
+- name: install client via pip
+  pip: name="{{ mythical_client_pip_name }}" state=present version="{{ mythical_client_pip_version }}"
+  when: mythical_client_pip_version != ''
+
+- name: install latest client via pip
+  pip: name="{{ mythical_client_pip_name }}" state=present
+  when: not mythical_client_pip_version

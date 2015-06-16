@@ -19,7 +19,7 @@ mythical_sync_src:  # e.g. ~/code/bp/mythical
 
 mythical_client: true
 mythical_client_pip_name: mythical
-mythical_client_pip_version: 0.1.1
+mythical_client_pip_version: 0.2.0
 
 # base
 
