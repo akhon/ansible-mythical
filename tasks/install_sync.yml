@@ -2,7 +2,7 @@
 
 - name: create sync destination
   file: dest="~/mythical" state=directory mode=0755
-  sudo: no
+  become: no
 
 - name: sync source to destination
   synchronize:
@@ -10,7 +10,7 @@
     dest: "~/mythical/"
     delete: no
     rsync_opts: "--exclude=*.pyc --exclude=*.pyo --exclude=.*"
-  sudo: no
+  become: no
 
 - name: install from source
   pip: name="~{{ ansible_ssh_user }}/mythical[daemon]" extra_args=-e

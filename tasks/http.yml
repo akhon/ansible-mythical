@@ -40,7 +40,7 @@
   when: mythical_http_enabled
 
 - name: disable http
-  file: /var/lib/mythical/http/health state=absent
+  file: path=/var/lib/mythical/http/health state=absent
   when: not mythical_http_enabled
 
 - name: http supervisor present
